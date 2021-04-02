@@ -1,0 +1,60 @@
+<body>
+
+    <div class="limiter">
+        <div class="container-table100">
+            <div class="wrap-table100">
+                <div class="table100 ver1 m-b-110">
+                    <div class="table100-head">
+                        <table>
+                            <thead>
+                                <tr class="row100 head">
+                                    <th class="cell100 column1">Name</th>
+                                    <th class="cell100 column2">Test1</th>
+                                    <th class="cell100 column3">Test2</th>
+                                    <th class="cell100 column4">Test3</th>
+                                    <th class="cell100 column5">Test4</th>
+                                    <th class="cell100 column6">Finale</th>
+                                    <th class="cell100 column7">Grade</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+
+                    <div class="table100-body js-pscroll">
+                        <table>
+                            <tbody>
+                                <% result.forEach(function(obj){ %>
+                                    <tr class="row100 body">
+                                        <td class=".cell100 column1">
+                                            <%=obj['First name']%>
+                                        </td>
+                                        <td class=".cell100 column2">
+                                            <%=obj.Test1%>
+                                        </td>
+                                        <td class=".cell100 column3">
+                                            <%=obj.Test2%>
+                                        </td>
+                                        <td class=".cell100 column4">
+                                            <%=obj.Test3%>
+                                        </td>
+                                        <td class=".cell100 column5">
+                                            <%=obj.Test4%>
+                                        </td>
+                                        <td class=".cell100 column6">
+                                            <%=obj.Final%>
+                                        </td>
+                                        <td class=".cell100 column7">
+                                            <%=obj.Grade%>
+                                        </td>
+                                    </tr>
+                                    <%})%>
+                            </tbody>
+                        </table>
+                    </div>
+
+
+
+                    <!--===============================================================================================-->
+                    <script src="js/main.js"></script>
+
+</body>

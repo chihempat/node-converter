@@ -1,0 +1,101 @@
+
+
+
+// const result = excelToJson({
+//     source: fs.readFileSync('Product.xlsx') // fs.readFileSync return a Buffer
+// });
+// console.log(result)
+
+
+// fs.createReadStream('grades.csv')
+//     .pipe(csv())
+//     .on('data', (row) => {
+//         csvjson.push(row);
+//         console.log(row)
+//     })
+//     .on('end', () => {
+//         console.log('CSV file successfully processed');
+//     });
+
+
+
+//connect2()
+// xlsxFile('Product.xlsx').then((rows) => {
+//     console.log(rows)
+//     xljson.push(row);
+// })
+
+// console.log(process.env.URI)
+// mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true }, (connect) => {
+//     console.log('Mongoose connected');
+// })
+
+
+
+    // app.get("/csvtopdf", upload.single('file'), async(req, res) => {
+    //     const rows = await CSVToJSON().fromFile('uploads/grades.csv');
+    //     let data = JSON.stringify(rows);
+    //     ejs.render('template', { result: rows, route: "csv" });
+
+     // fs.writeFile('./temp.html', data, function(error, data) {
+     //     if (error) {
+     //         res.writeHead(404);
+     //         res.write('Whoops! File not found!');
+     //     } else {
+     //         res.redirect('/pdfFromHtml')
+     //     }
+     //  })
+
+// app.get('/pdfFromHTML', function(req, res) {
+//     res.pdfFromHTML({
+//         filename: 'generated.pdf',
+//         html: 'views/template.ejs',
+//     });
+// });
+
+
+
+app.get("/xltopdf", upload.single('file'), (req, res) => {
+    console.log(req.body.file)
+
+    if (fs.existsSync('./product.json')) {
+        let rawdata = fs.readFileSync('product.json');
+        let data = JSON.parse(rawdata);
+        data = JSON.stringify(data);
+        fs.writeFile('./temp.html', data, function(error, data) {
+            if (error) {
+                res.writeHead(404);
+                res.write('Whoops! File not found!');
+            } else {
+                res.redirect('/pdfFromHtml')
+            }
+        });
+        // console.log(data);
+    } else {
+        node_xj({
+                input: "./uploads/Product.xlsx", // input xls
+                output: "product.json", // output json
+                allowEmptyKey: false,
+                lowerCaseHeaders: true
+            },
+            function(err, result) {
+                if (err) {
+                    console.error(err);
+                } else {
+                    let rawdata = fs.readFileSync('product.json');
+                    let data = JSON.parse(rawdata);
+                    data = JSON.stringify(data);
+
+                    fs.writeFile('./temp.html', data, function(error, data) {
+                        if (error) {
+                            res.writeHead(404);
+                            res.write('Whoops! File not found!');
+                        } else {
+                            res.redirect('/pdfFromHtml')
+                        }
+                    });
+                }
+            }
+        );
+    }
+})
