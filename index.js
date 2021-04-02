@@ -3,33 +3,24 @@ var path = require('path');
 const express = require('express')
 const fs = require('fs')
 const multer = require('multer')
-const xlsx = require('xlsx');
-const xlsxFile = require('read-excel-file/node')
-const mongoose = require('mongoose');
 const excelToJson = require('convert-excel-to-json');
 const { MongoClient } = require("mongodb");
-//const csv = require('csv-parser');
 const CSVToJSON = require('csvtojson');
-//const excel2json = require('excel2json');
 const node_xj = require("xls-to-json");
-//const xlsxtojson = require('xlsx-to-json');
-// const pdf = require('express-pdf');
 let pdf = require("html-pdf");
 const ejs = require('ejs');
 const expressLayouts = require('express-ejs-layouts');
+
 const { topdf } = require('./config/function')
 
 const PORT = process.env.PORT || 5000;
 const uri = process.env.URI || 'mongodb+srv://Chintan:helloworld@cluster0.w12fo.mongodb.net/filesdb?retryWrites=true&w=majority'
-var upload = multer({ dest: 'uploads/' })
-
-let xljson = [];
-let csvjson = [];
-let cv = {}
 
 const app = express();
 const client = new MongoClient(uri, { useUnifiedTopology: true });
 const connect = client.connect().then((res) => console.log("connected")).catch()
+
+var upload = multer({ dest: 'uploads/' })
 
 var storage = multer.diskStorage({
     destination: function(req, file, cb) {
@@ -43,8 +34,8 @@ var storage = multer.diskStorage({
 var upload = multer({ storage: storage })
 
 
-//app.use(pdf);
 
+//parsers
 app.use(express.urlencoded({ extended: false })); //handle body requests
 app.use(express.json()); // let's make JSON work too!
 app.use('/', express.static(__dirname + '/public'));
@@ -54,15 +45,16 @@ app.set('views', path.join(__dirname, 'views'))
 app.use(expressLayouts);
 app.set('view engine', 'ejs');
 
+
+//@desc     for fetching index
+//@route    GET:/
 app.get("/", (req, res) => {
-        res.render('index')
-    })
-    // app.post('/convert', upload.single('file'), (req, res) => {
-
-//     console.log("coverted")
-// })
+    res.render('index')
+})
 
 
+//@desc     for uploading to DB
+//@route    POST:/upload
 app.post("/upload", upload.single('file'), async(req, res) => {
     var ext = req.file.originalname.split('.')[1];
     var og = req.file.originalname.split('.')[0];
@@ -116,7 +108,8 @@ app.post("/upload", upload.single('file'), async(req, res) => {
 
 })
 
-
+//@desc     for converting cvs to PDF
+//@route    POST:/csvtopdf
 app.post("/csvtopdf", upload.single('file'), async(req, res) => {
     var keys = [];
     console.log(req.file)
@@ -125,26 +118,28 @@ app.post("/csvtopdf", upload.single('file'), async(req, res) => {
     topdf(req, res, data, keys);
 })
 
+//@desc     for converting Excell to PDF
+//@route    POST:/xltopdf
 app.post("/xltopdf", upload.single('file'), (req, res) => {
-    console.log(req.body.file)
-    var keys = [];
-    var data = excelToJson({
-        source: fs.readFileSync(req.file.path),
-        columnToKey: {
-            '*': '{{columnHeader}}'
-        }
-    });
-    data = data.Sheet1;
-    Object.keys(data[0]).forEach(function(key) {
-        var value = data[0][key];
-        keys.push(value)
-    });
-    console.log(keys)
-    topdf(req, res, data, keys);
-})
-
-app.get("/excelltojson", (req, res) => {
-
+        console.log(req.body.file)
+        var keys = [];
+        var data = excelToJson({
+            source: fs.readFileSync(req.file.path),
+            columnToKey: {
+                '*': '{{columnHeader}}'
+            }
+        });
+        data = data.Sheet1;
+        Object.keys(data[0]).forEach(function(key) {
+            var value = data[0][key];
+            keys.push(value)
+        });
+        console.log(keys)
+        topdf(req, res, data, keys);
+    })
+    //@desc     for converting Excell to JSON File
+    //@route    POST:/excelltojson
+app.post("/excelltojson", upload.single('file'), (req, res) => {
     var coverttojson = function() {
         node_xj({
                 input: "./output/Product.xlsx", // input xls
@@ -161,36 +156,8 @@ app.get("/excelltojson", (req, res) => {
             }
         );
     }
-
-    async() => {
-        try {
-            await client.connect();
-            const database = client.db("filesdb");
-            const grades = database.collection("products");
-            const options = { ordered: true };
-            const result = await grades.insertMany(xl, options);
-            console.log(`${result.insertedCount} documents were inserted`);
-        } finally {
-            console.log("done")
-        }
-    }
-
 })
 
-app.get("/csvtojson", (req, res) => {
-    async() => {
-        try {
-            const database = client.db("filesdb");
-            const grades = database.collection("grades");
-            const options = { ordered: true };
-            const result = await grades.insertMany(xl, options);
-            console.log(`${result.insertedCount} documents were inserted`);
-        } finally {
-            console.log("done")
-        }
-    }
-
-})
 
 app.listen(PORT, () => {
     console.log('Mongoose listening on port ' + PORT);

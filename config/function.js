@@ -1,6 +1,8 @@
 const ejs = require('ejs');
 const path = require('path');
 let pdf = require("html-pdf");
+const node_xj = require("xls-to-json");
+
 
 
 var topdf = function(req, res, data, keys) {
@@ -35,6 +37,23 @@ var topdf = function(req, res, data, keys) {
         }
     });
 
+}
+
+var xltojson = function() {
+    node_xj({
+            input: "./output/Product.xlsx", // input xls
+            output: "output.json", // output json
+            allowEmptyKey: false,
+            lowerCaseHeaders: true
+        },
+        function(err, result) {
+            if (err) {
+                console.error(err);
+            } else {
+                console.log(result);
+            }
+        }
+    );
 }
 
 module.exports = { topdf }
