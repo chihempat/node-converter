@@ -1,6 +1,6 @@
 <div class="jumbotron">
     <h1 class="display-3">Hello!</h1>
-    <p class="lead">This is a simple Website, To convert files</p>
+    <p class="lead">This is a Web APP for converting files into pdf</p>
     <hr class="my-4">
 
     <p class="lead">
@@ -13,13 +13,13 @@
                         <label class="custom-file-label" for="inputGroupFile02 ">Choose file</label>
                     </div>
                     <div class="input-group-append">
-                        <span class="input-group-text">Upload</span>
+                        <button class="input-group btn btn-dark" type="submit" value="./upload" role="button">Upload To DB</button>
                     </div>
                 </div>
-                <button class="btn btn-primary form-group" formaction="./csvtopdf">Convert CSV To PDF</button>
+                <button class="btn btn-success form-group" formaction="./csvtopdf">Convert CSV To PDF</button>
                 <button class="btn btn-primary form-group" formaction="./xltopdf">Convert EXCEL To PDF</button>
             </div>
-            <button class="btn btn-primary form-group" type="submit" value="./upload" role="button">Upload To DB</button>
+
         </form>
     </p>
 </div>

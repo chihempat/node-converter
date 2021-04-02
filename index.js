@@ -121,24 +121,25 @@ app.post("/csvtopdf", upload.single('file'), async(req, res) => {
 //@desc     for converting Excell to PDF
 //@route    POST:/xltopdf
 app.post("/xltopdf", upload.single('file'), (req, res) => {
-        console.log(req.body.file)
-        var keys = [];
-        var data = excelToJson({
-            source: fs.readFileSync(req.file.path),
-            columnToKey: {
-                '*': '{{columnHeader}}'
-            }
-        });
-        data = data.Sheet1;
-        Object.keys(data[0]).forEach(function(key) {
-            var value = data[0][key];
-            keys.push(value)
-        });
-        console.log(keys)
-        topdf(req, res, data, keys);
-    })
-    //@desc     for converting Excell to JSON File
-    //@route    POST:/excelltojson
+    console.log(req.body.file)
+    var keys = [];
+    var data = excelToJson({
+        source: fs.readFileSync(req.file.path),
+        columnToKey: {
+            '*': '{{columnHeader}}'
+        }
+    });
+    data = data.Sheet1;
+    Object.keys(data[0]).forEach(function(key) {
+        var value = data[0][key];
+        keys.push(value)
+    });
+    console.log(keys)
+    topdf(req, res, data, keys);
+})
+
+//@desc     for converting Excell to JSON File
+//@route    POST:/excelltojson
 app.post("/excelltojson", upload.single('file'), (req, res) => {
     var coverttojson = function() {
         node_xj({
