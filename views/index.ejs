@@ -4,9 +4,10 @@
     <hr class="my-4">
 
     <p class="lead">
-        <form action="./convert" method="post" enctype="multipart/form-data">
+        <form method="post" enctype="multipart/form-data">
             <div class="form-group">
                 <div class="input-group mb-3">
+                    <input type="submit" formaction="./upload" style="visibility: hidden; display: none;">
                     <div class="custom-file">
                         <input type="file" class="custom-file-input" id="file" name="file">
                         <label class="custom-file-label" for="inputGroupFile02 ">Choose file</label>
@@ -15,10 +16,10 @@
                         <span class="input-group-text">Upload</span>
                     </div>
                 </div>
-                <a class="btn btn-primary form-group" href="./csvtopdf" role="button">Convert CSV</a>
-                <a class="btn btn-primary form-group" href="./xltopdf" role="button">Convert EXCEL</a>
+                <button class="btn btn-primary form-group" formaction="./csvtopdf">Convert CSV</button>
+                <button class="btn btn-primary form-group" formaction="./xltopdf">Convert EXCEL</button>
             </div>
-            <button class="btn btn-primary form-group" type="submit" role="button">Upload To DB</button>
+            <button class="btn btn-primary form-group" type="submit" value="./upload" role="button">Upload To DB</button>
         </form>
     </p>
 </div>

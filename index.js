@@ -13,11 +13,11 @@ const CSVToJSON = require('csvtojson');
 //const excel2json = require('excel2json');
 const node_xj = require("xls-to-json");
 //const xlsxtojson = require('xlsx-to-json');
-var exphbs = require('express-handlebars');
 // const pdf = require('express-pdf');
 let pdf = require("html-pdf");
 const ejs = require('ejs');
 const expressLayouts = require('express-ejs-layouts');
+const { topdf } = require('./config/function')
 
 const PORT = process.env.PORT || 5000;
 const uri = process.env.URI || 'mongodb+srv://Chintan:helloworld@cluster0.w12fo.mongodb.net/filesdb?retryWrites=true&w=majority'
@@ -63,7 +63,7 @@ app.get("/", (req, res) => {
 // })
 
 
-app.post("/convert", upload.single('file'), async(req, res) => {
+app.post("/upload", upload.single('file'), async(req, res) => {
     var ext = req.file.originalname.split('.')[1];
     var og = req.file.originalname.split('.')[0];
 
@@ -117,21 +117,15 @@ app.post("/convert", upload.single('file'), async(req, res) => {
 })
 
 
-app.get("/csvtopdf", upload.single('file'), async(req, res) => {
+app.post("/csvtopdf", upload.single('file'), async(req, res) => {
     var keys = [];
     console.log(req.file)
-        // const data = await CSVToJSON().fromFile(req.file.path);
-        // Object.keys(data[0]).forEach(function(key) {
-        //     var value = data[0][key];
-        //     keys.push(value)
-        // });
-        // topdf(req, res, data, keys);
+    const data = await CSVToJSON().fromFile(req.file.path);
+    keys = Object.keys(data[0])
+    topdf(req, res, data, keys);
 })
 
-
-
-
-app.get("/xltopdf", upload.single('file'), (req, res) => {
+app.post("/xltopdf", upload.single('file'), (req, res) => {
     console.log(req.body.file)
     var keys = [];
     var data = excelToJson({
@@ -201,39 +195,3 @@ app.get("/csvtojson", (req, res) => {
 app.listen(PORT, () => {
     console.log('Mongoose listening on port ' + PORT);
 })
-
-
-
-var topdf = function(req, res, data, keys) {
-
-    ejs.renderFile(path.join(__dirname, './views/', "data.ejs"), { result: data, keys: keys }, (err, html) => {
-        if (err) {
-            res.send(err);
-        } else {
-            let options = {
-                "height": "10in",
-                "width": "16in",
-                "header": {
-                    "height": "20mm"
-                },
-                "footer": {
-                    "height": "20mm",
-                },
-            };
-            pdf.create(html, options).toFile("report.pdf", function(err, data) {
-                if (err) {
-                    res.send(err);
-                } else {
-                    res.download(path.join(__dirname, "report.pdf"), "report.pdf", (err) => {
-                        if (err) {
-                            res.status(500).send({
-                                message: "Could not download the file. " + err,
-                            });
-                        }
-                    });
-                }
-            });
-        }
-    });
-
-}
