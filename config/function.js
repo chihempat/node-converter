@@ -22,7 +22,7 @@ var topdf = function(req, res, data, keys) {
                 "footer": {
                     "height": "20mm",
                 },
-                "timeout": 30000,
+                "timeout": 180000,
             };
             pdf.create(html, options).toFile("report.pdf", function(err, data) {
                 if (err) {
