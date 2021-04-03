@@ -13,7 +13,7 @@ const expressLayouts = require('express-ejs-layouts');
 
 const { topdf } = require('./config/function')
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8080;
 const uri = process.env.URI || 'mongodb+srv://Chintan:helloworld@cluster0.w12fo.mongodb.net/filesdb?retryWrites=true&w=majority'
 
 const app = express();
@@ -51,7 +51,9 @@ app.set('view engine', 'ejs');
 app.get("/", (req, res) => {
     res.render('index')
 })
-
+app.post("/", (req, res) => {
+    res.redirect('/upload')
+})
 
 //@desc     for uploading to DB
 //@route    POST:/upload
@@ -100,6 +102,7 @@ app.post("/upload", upload.single('file'), async(req, res) => {
             console.log(`${result.insertedCount} documents were inserted`);
         } catch (err) {
             console.error(err);
+            res.redirect(404, '/')
         } finally {
             console.log("done")
             res.redirect('/')
@@ -121,7 +124,7 @@ app.post("/csvtopdf", upload.single('file'), async(req, res) => {
 //@desc     for converting Excell to PDF
 //@route    POST:/xltopdf
 app.post("/xltopdf", upload.single('file'), (req, res) => {
-    console.log(req.body.file)
+    //console.log(req.body.file)
     var keys = [];
     var data = excelToJson({
         source: fs.readFileSync(req.file.path),
