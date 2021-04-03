@@ -130,7 +130,8 @@ app.post("/xltopdf", upload.single('file'), (req, res) => {
             '*': '{{columnHeader}}'
         }
     });
-    data = data.Sheet1;
+    var k1 = Object.keys(data);
+    data = data[k1];
     Object.keys(data[0]).forEach(function(key) {
         var value = data[0][key];
         keys.push(value)

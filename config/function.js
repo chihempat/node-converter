@@ -12,14 +12,17 @@ var topdf = function(req, res, data, keys) {
             res.send(err);
         } else {
             let options = {
-                "height": "10in",
-                "width": "16in",
+                // "height": "10.5in", // allowed units: mm, cm, in, px
+                // "width": "8in", // allowed units: mm, cm, in, px
+                "format": "A3", // allowed units: A3, A4, A5, Legal, Letter, Tabloid
+                "orientation": "landscape",
                 "header": {
                     "height": "20mm"
                 },
                 "footer": {
                     "height": "20mm",
                 },
+                "timeout": 30000,
             };
             pdf.create(html, options).toFile("report.pdf", function(err, data) {
                 if (err) {
@@ -27,6 +30,7 @@ var topdf = function(req, res, data, keys) {
                 } else {
                     res.download(path.join(__dirname, "../report.pdf"), "report.pdf", (err, data) => {
                         if (err) {
+                            console.error(err);
                             res.status(500).send({
                                 message: "Could not download the file. " + err,
                             });
