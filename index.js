@@ -51,13 +51,11 @@ app.set('view engine', 'ejs');
 app.get("/", (req, res) => {
     res.render('index')
 })
-app.post("/", (req, res) => {
-    res.redirect('/upload')
-})
 
 //@desc     for uploading to DB
 //@route    POST:/upload
 app.post("/upload", upload.single('file'), async(req, res) => {
+    console.log("in")
     var ext = req.file.originalname.split('.')[1];
     var og = req.file.originalname.split('.')[0];
 
@@ -93,7 +91,7 @@ app.post("/upload", upload.single('file'), async(req, res) => {
         console.log(6)
         try {
             console.log(7)
-            const data = await CSVToJSON().fromFile('uploads/grades.csv');
+            const data = await CSVToJSON().fromFile(req.file.path);
             const database = client.db("filesdb");
             const db = database.collection(og);
             const options = { ordered: true };
