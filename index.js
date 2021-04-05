@@ -14,11 +14,11 @@ const expressLayouts = require('express-ejs-layouts');
 var session = require('express-session');
 var flash = require('req-flash');
 var i = 0;
-var f = 0;
+var f = 1;
 const { topdf } = require('./config/function')
 
 const PORT = process.env.PORT || 8080;
-const uri = process.env.URI || 'mongodb+srv://Chintan:helloworld@cluster0.w12fo.mongodb.net/filesdb?retryWrites=true&w=majority'
+const uri = process.env.URI || 'mongodb://localhost:27017';
 const app = express();
 const client = new MongoClient(uri, { useUnifiedTopology: true });
 const connect = client.connect().then((res) => {
