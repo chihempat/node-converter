@@ -9,17 +9,22 @@ const CSVToJSON = require('csvtojson');
 const node_xj = require("xls-to-json");
 let pdf = require("html-pdf");
 const ejs = require('ejs');
+var cookieParser = require('cookie-parser');
 const expressLayouts = require('express-ejs-layouts');
-
+var session = require('express-session');
+var flash = require('req-flash');
+var i = 0;
+var f = 0;
 const { topdf } = require('./config/function')
 
 const PORT = process.env.PORT || 8080;
 const uri = process.env.URI || 'mongodb+srv://Chintan:helloworld@cluster0.w12fo.mongodb.net/filesdb?retryWrites=true&w=majority'
-
 const app = express();
 const client = new MongoClient(uri, { useUnifiedTopology: true });
-const connect = client.connect().then((res) => console.log("connected")).catch()
+const connect = client.connect().then((res) => {
+    console.log("connected")
 
+}).catch()
 var upload = multer({ dest: 'uploads/' })
 
 var storage = multer.diskStorage({
@@ -32,8 +37,17 @@ var storage = multer.diskStorage({
 })
 
 var upload = multer({ storage: storage })
+var ssn;
 
-
+//sessions
+app.use(cookieParser());
+app.use(session({
+    cookie: { maxAge: 60000 },
+    saveUninitialized: true,
+    resave: 'true',
+    secret: 'secret'
+}, ));
+app.use(flash());
 
 //parsers
 app.use(express.urlencoded({ extended: false })); //handle body requests
@@ -45,66 +59,57 @@ app.set('views', path.join(__dirname, 'views'))
 app.use(expressLayouts);
 app.set('view engine', 'ejs');
 
+//set global vars
+app.use(function(req, res, next) {
+
+    next();
+});
 
 //@desc     for fetching index
 //@route    GET:/
 app.get("/", (req, res) => {
+    ssn = req.session;
     res.render('index')
 })
 
 //@desc     for uploading to DB
 //@route    POST:/upload
 app.post("/upload", upload.single('file'), async(req, res) => {
+    f = 0;
+    setInterval(intervalFunc, 1000);
     console.log("in")
     var ext = req.file.originalname.split('.')[1];
     var og = req.file.originalname.split('.')[0];
+    const database = client.db("filesdb");
+    const db = database.collection(og);
+    const options = { ordered: true, checkKeys: false };
+    if (ext == "xlsx" || ext == "xls") {
 
-    if (ext == "xlsx") {
-        console.log(1)
-
-        console.log(2)
-        try {
-            console.log(3)
-            var data = excelToJson({
-                source: fs.readFileSync(req.file.path),
-                columnToKey: {
-                    '*': '{{columnHeader}}'
-                }
-            });
-            data = data.Sheet1
-            const database = client.db("filesdb");
-            const db = database.collection(og);
-            const options = { ordered: true };
-            console.log(4)
-            const result = await db.insertMany(data, options);
+        var data = excelToJson({
+            source: fs.readFileSync(req.file.path),
+            columnToKey: {
+                '*': '{{columnHeader}}'
+            }
+        });
+        var k1 = Object.keys(data);
+        data = data[k1];
+        db.insertMany(data, options).then((result) => {
             console.log(`${result.insertedCount} documents were inserted`);
-        } catch (err) {
-            console.error(err);
-        } finally {
-            console.log("done")
-            res.redirect('/')
-        }
+            f = 1;
+            clearInterval(intervalFunc);
+            res.redirect('/');
+        });
+
 
     } else if (ext == "csv") {
-        console.log(5)
-
-        console.log(6)
-        try {
-            console.log(7)
-            const data = await CSVToJSON().fromFile(req.file.path);
-            const database = client.db("filesdb");
-            const db = database.collection(og);
-            const options = { ordered: true };
-            console.log(8)
-            const result = await db.insertMany(data, options);
+        const data = await CSVToJSON().fromFile(req.file.path);
+        db.insertMany(data, options).then((result) => {
             console.log(`${result.insertedCount} documents were inserted`);
-        } catch (err) {
-            console.error(err);
-            res.redirect(404, '/')
-        } finally {
-            console.log("done")
-            res.redirect('/')
-        }
+            f = 1;
+            clearInterval(intervalFunc);
+            res.redirect('/');
+        });
+
     }
 
 })
@@ -165,3 +170,11 @@ app.post("/excelltojson", upload.single('file'), (req, res) => {
 app.listen(PORT, () => {
     console.log('Mongoose listening on port ' + PORT);
 })
+
+
+function intervalFunc() {
+    if (!f)
+        console.log(i++);
+    else
+        i = 0;
+}

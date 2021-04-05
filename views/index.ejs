@@ -1,26 +1,30 @@
-<div class="jumbotron">
-    <h1 class="display-3">Hello!</h1>
-    <p class="lead">This is a Web APP for converting files into pdf</p>
-    <hr class="my-4">
+<%if(typeof(locals.msg)!="undefined"){%>
+    <%-success %>
+        <% } %>
 
-    <p class="lead">
-        <form method="POST" enctype="multipart/form-data">
-            <div class="form-group">
-                <div class="input-group mb-3">
-                    <input type="submit" formaction="./upload" style="visibility: hidden; display: none;">
-                    <div class="custom-file">
-                        <input type="file" class="custom-file-input" id="file" name="file">
-                        <label class="custom-file-label" for="inputGroupFile02 ">Choose file</label>
-                    </div>
-                    <div class="input-group-append">
-                        <button class="input-group btn btn-dark" type="submit" formaction="./upload" value="./upload" role="button">Upload To DB</button>
-                    </div>
-                </div>
-                <button class="btn btn-success form-group" formaction="./csvtopdf">Convert CSV To PDF</button>
-                <button class="btn btn-primary form-group" formaction="./xltopdf">Convert EXCEL To PDF</button>
+            <div class="jumbotron">
+                <h1 class="display-3">Hello!</h1>
+                <p class="lead">This is a Web APP for converting files into pdf</p>
+                <hr class="my-4">
+
+                <p class="lead">
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <div class="input-group mb-3">
+                                <input type="submit" formaction="./upload" style="visibility: hidden; display: none;">
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" id="file" name="file">
+                                    <label class="custom-file-label" for="inputGroupFile02 ">Choose file</label>
+                                </div>
+                                <div class="input-group-append">
+                                    <button class="input-group btn btn-dark" type="submit" formaction="./upload" value="./upload" role="button">Upload To DB</button>
+                                </div>
+                            </div>
+                            <button class="btn btn-success form-group" formaction="./csvtopdf">Convert CSV To PDF</button>
+                            <button class="btn btn-primary form-group" formaction="./xltopdf">Convert EXCEL To PDF</button>
+                        </div>
+                        <!-- <button class="input-group btn btn-dark" type="submit" formaction="./upload" value="./upload" role="button">Upload To DB</button> -->
+                        <!-- <button class="btn btn-primary form-group" type="submit" formaction="./upload" value="./upload" role="button">Upload To DB</button> -->
+                    </form>
+                </p>
             </div>
-            <!-- <button class="input-group btn btn-dark" type="submit" formaction="./upload" value="./upload" role="button">Upload To DB</button> -->
-            <!-- <button class="btn btn-primary form-group" type="submit" formaction="./upload" value="./upload" role="button">Upload To DB</button> -->
-        </form>
-    </p>
-</div>
