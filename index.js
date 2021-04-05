@@ -12,6 +12,7 @@ const ejs = require('ejs');
 var cookieParser = require('cookie-parser');
 const expressLayouts = require('express-ejs-layouts');
 var session = require('express-session');
+const paginate = require('express-paginate');
 var flash = require('req-flash');
 var i = 0;
 var f = 1;
@@ -19,12 +20,18 @@ const { topdf } = require('./config/function')
 
 const PORT = process.env.PORT || 8080;
 const uri = process.env.URI || 'mongodb://localhost:27017';
-const app = express();
-const client = new MongoClient(uri, { useUnifiedTopology: true });
-const connect = client.connect().then((res) => {
-    console.log("connected")
+const url = process.env.URL || 'mongodb+srv://Chintan:helloworld@cluster0.w12fo.mongodb.net/filesdb?retryWrites=true&w=majority'
 
-}).catch()
+const app = express();
+
+const client = new MongoClient(uri, { useUnifiedTopology: true });
+client.connect().then((res) => {
+    console.log("connected")
+}).catch(err => console.log(err))
+
+
+setInterval(intervalFunc, 1000);
+
 var upload = multer({ dest: 'uploads/' })
 
 var storage = multer.diskStorage({
@@ -75,14 +82,15 @@ app.get("/", (req, res) => {
 //@desc     for uploading to DB
 //@route    POST:/upload
 app.post("/upload", upload.single('file'), async(req, res) => {
+    var keys = []
     f = 0;
-    setInterval(intervalFunc, 1000);
     console.log("in")
-    var ext = req.file.originalname.split('.')[1];
-    var og = req.file.originalname.split('.')[0];
+    let ext = req.file.originalname.split('.')[1];
+    let og = req.file.originalname.split('.')[0];
     const database = client.db("filesdb");
     const db = database.collection(og);
     const options = { ordered: true, checkKeys: false };
+    var bulk = db.initializeOrderedBulkOp();
     if (ext == "xlsx" || ext == "xls") {
 
         var data = excelToJson({
@@ -90,8 +98,10 @@ app.post("/upload", upload.single('file'), async(req, res) => {
             columnToKey: {
                 '*': '{{columnHeader}}'
             }
+
         });
         var k1 = Object.keys(data);
+        console.log(k1)
         data = data[k1];
         db.insertMany(data, options).then((result) => {
             console.log(`${result.insertedCount} documents were inserted`);
@@ -99,19 +109,37 @@ app.post("/upload", upload.single('file'), async(req, res) => {
             clearInterval(intervalFunc);
             res.redirect('/');
         });
+        // db.insertMany(data, options).then((result) => {
+        //     console.log(`${result.insertedCount} documents were inserted`);
+        //     f = 1;
+        //     clearInterval(intervalFunc);
+        //     res.redirect('/');
+        // });
 
 
     } else if (ext == "csv") {
         const data = await CSVToJSON().fromFile(req.file.path);
-        db.insertMany(data, options).then((result) => {
-            console.log(`${result.insertedCount} documents were inserted`);
-            f = 1;
-            clearInterval(intervalFunc);
-            res.redirect('/');
+        for (var j = 0; j < data.length; ++j) {
+            bulk.insert(data[j])
+        }
+        bulk.execute(function(err, result) {
+            if (result) {
+                console.dir(result);
+                res.redirect('/');
+                f = 1;
+            } else if (err) {
+                console.dir(err);
+                res.render('./partials/error')
+                f = 1;
+            }
         });
-
+        // db.insertMany(data, options).then((result) => {
+        //     console.log(`${result.insertedCount} documents were inserted`);
+        //     f = 1;
+        //     clearInterval(intervalFunc);
+        //     res.redirect('/');
+        // });
     }
-
 })
 
 //@desc     for converting cvs to PDF
