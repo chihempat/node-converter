@@ -96,25 +96,19 @@ app.post("/upload", upload.single('file'), async(req, res) => {
 
         var data = excelToJson({
             source: fs.readFileSync(req.file.path),
+            columnToKey: {
+                '*': '{{columnHeader}}'
+            }
 
         });
         var k1 = Object.keys(data);
         console.log(k1)
         data = data[k1];
-        for (var j = 0; j < data.length; ++j) {
-            bulk.insert(data[j], options);
-        }
-        bulk.execute(function(err, result) {
-            if (result) {
-                console.dir(result);
-                res.redirect('/');
-                f = 1;
-            } else if (err) {
-                console.dir(err);
-                res.render('./partials/error')
-                f = 1;
-            }
-
+        db.insertMany(data, options).then((result) => {
+            console.log(`${result.insertedCount} documents were inserted`);
+            f = 1;
+            clearInterval(intervalFunc);
+            res.redirect('/');
         });
         // db.insertMany(data, options).then((result) => {
         //     console.log(`${result.insertedCount} documents were inserted`);
