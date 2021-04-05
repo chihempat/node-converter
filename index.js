@@ -1,28 +1,31 @@
 'use strict';
-var path = require('path');
+const path = require('path');
 const express = require('express')
 const fs = require('fs')
 const multer = require('multer')
 const excelToJson = require('convert-excel-to-json');
 const { MongoClient } = require("mongodb");
 const CSVToJSON = require('csvtojson');
-const node_xj = require("xls-to-json");
 let pdf = require("html-pdf");
-const ejs = require('ejs');
 var cookieParser = require('cookie-parser');
 const expressLayouts = require('express-ejs-layouts');
 var session = require('express-session');
 const paginate = require('express-paginate');
-var flash = require('req-flash');
-var i = 0;
-var f = 1;
+
 const { topdf } = require('./config/function')
 
 const PORT = process.env.PORT || 8080;
 const uri = process.env.URI || 'mongodb://localhost:27017';
 const url = process.env.URL || 'mongodb+srv://Chintan:helloworld@cluster0.w12fo.mongodb.net/filesdb?retryWrites=true&w=majority'
 
+
 const app = express();
+
+
+var i = 0;
+var f = 1;
+setInterval(intervalFunc, 1000);
+
 
 const client = new MongoClient(uri, { useUnifiedTopology: true });
 client.connect().then((res) => {
@@ -30,10 +33,8 @@ client.connect().then((res) => {
 }).catch(err => console.log(err))
 
 
-setInterval(intervalFunc, 1000);
 
 var upload = multer({ dest: 'uploads/' })
-
 var storage = multer.diskStorage({
     destination: function(req, file, cb) {
         cb(null, 'uploads')
@@ -42,7 +43,6 @@ var storage = multer.diskStorage({
         cb(null, file.fieldname + '-' + Date.now() + "." + file.originalname.split('.')[1])
     }
 })
-
 var upload = multer({ storage: storage })
 var ssn;
 
@@ -54,7 +54,10 @@ app.use(session({
     resave: 'true',
     secret: 'secret'
 }, ));
-app.use(flash());
+
+//[aginaiton]
+app.use(paginate.middleware(10, 50));
+
 
 //parsers
 app.use(express.urlencoded({ extended: false })); //handle body requests
@@ -68,7 +71,6 @@ app.set('view engine', 'ejs');
 
 //set global vars
 app.use(function(req, res, next) {
-
     next();
 });
 
@@ -91,17 +93,15 @@ app.post("/upload", upload.single('file'), async(req, res) => {
     const db = database.collection(og);
     const options = { ordered: true, checkKeys: false };
     var bulk = db.initializeOrderedBulkOp();
-    if (ext == "xlsx" || ext == "xls") {
 
+    if (ext == "xlsx" || ext == "xls") {
         var data = excelToJson({
             source: fs.readFileSync(req.file.path),
             columnToKey: {
                 '*': '{{columnHeader}}'
             }
-
         });
         var k1 = Object.keys(data);
-        console.log(k1)
         data = data[k1];
         db.insertMany(data, options).then((result) => {
             console.log(`${result.insertedCount} documents were inserted`);
@@ -109,12 +109,6 @@ app.post("/upload", upload.single('file'), async(req, res) => {
             clearInterval(intervalFunc);
             res.redirect('/');
         });
-        // db.insertMany(data, options).then((result) => {
-        //     console.log(`${result.insertedCount} documents were inserted`);
-        //     f = 1;
-        //     clearInterval(intervalFunc);
-        //     res.redirect('/');
-        // });
 
 
     } else if (ext == "csv") {
@@ -133,12 +127,7 @@ app.post("/upload", upload.single('file'), async(req, res) => {
                 f = 1;
             }
         });
-        // db.insertMany(data, options).then((result) => {
-        //     console.log(`${result.insertedCount} documents were inserted`);
-        //     f = 1;
-        //     clearInterval(intervalFunc);
-        //     res.redirect('/');
-        // });
+
     }
 })
 

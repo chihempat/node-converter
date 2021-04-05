@@ -8,16 +8,15 @@ var i = 0
 
 var topdf = function(req, res, data, keys) {
     console.log(i++);
-    ejs.renderFile(path.join(__dirname, '../views/', "data.ejs"), { result: data, keys: keys }, (err, html) => {
+    ejs.renderFile(path.join(__dirname, '../views/', "data.ejs"), { result: data, keys: keys, limit: req.query.limit, offset: req.skip }, (err, html) => {
+
         console.log(i++);
         if (err) {
             res.send(err);
         } else {
             console.log(i++);
             let options = {
-                // "height": "10.5in", // allowed units: mm, cm, in, px
-                // "width": "8in", // allowed units: mm, cm, in, px
-                "format": "A3", // allowed units: A3, A4, A5, Legal, Letter, Tabloid
+                "format": "A3",
                 "orientation": "landscape",
                 "header": {
                     "height": "20mm"
